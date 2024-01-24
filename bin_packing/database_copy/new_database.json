@@ -1,0 +1,164 @@
+{
+    "0.05973223480947489": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n  \"\"\"Heursitic discovered for the OR datasets.\"\"\"\n  def s(bin, item):\n    if bin - item <= 2:\n      return 4\n    elif (bin - item) <= 3:\n      return 3\n    elif (bin - item) <= 5:\n      return 2\n    elif (bin - item) <= 7:\n      return 1\n    elif (bin - item) <= 9:\n      return 0.9\n    elif (bin - item) <= 12:\n      return 0.95\n    elif (bin - item) <= 15:\n      return 0.97\n    elif (bin - item) <= 18:\n      return 0.98\n    elif (bin - item) <= 20:\n      return 0.98\n    elif (bin - item) <= 21:\n      return 0.98\n    else:\n      return 0.99\n\n  return np.array([s(b, item) for b in bins])",
+        "Intuition": "A heuristic method found by other LLM",
+        "num_item": -1,
+        "parents": [
+            "0.05973223480947489",
+            "0.06591143151390326"
+        ]
+    },
+    "0.06591143151390326": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    return -(bins-item)",
+        "Intuition": "To place each item into the bin that would leave the least amount of empty space after the item is packed. ",
+        "num_item": -1,
+        "parents": [
+            "0.06591143151390326",
+            "0.05973223480947489"
+        ]
+    },
+    "0.06988694758478928": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n  \"\"\"Greedy choice heuristic.\"\"\"\n  return -abs(bins/2 - item)",
+        "Intuition": " This heuristic is based on the idea of \"greedy choice\". The heuristic prefers bins where the item's size is closer to half of the bin's remaining capacity. The reasoning behind this is that by splitting a bin's capacity in half with each item, we'll be more likely to fill up the bins more evenly and have less wasted space overall. ",
+        "num_item": 0,
+        "parents": [
+            "0.06591143151390326",
+            "0.05973223480947489"
+        ]
+    },
+    "0.06474820143884889": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins with the least remaining capacity.\"\"\"\n    return bins",
+        "Intuition": " The new heuristic aims to maximize the usage of the current bins before considering the use of a new bin. It prioritizes bins with the least remaining capacity.  ",
+        "num_item": 1,
+        "parents": [
+            "0.06988694758478928",
+            "0.06591143151390326"
+        ]
+    },
+    "0.06680369989722508": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins based on the ratio of the item size to the bin capacity.\"\"\"\n    return item / bins",
+        "Intuition": " The new heuristic will consider the ratio of the item size to the remaining capacity of the bins. It will prioritize bins where this ratio is higher, trying to fit larger items into bins where they take up a larger proportion of the remaining space. ",
+        "num_item": 2,
+        "parents": [
+            "0.05973223480947489",
+            "0.06474820143884889"
+        ]
+    },
+    "0.28776978417266186": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins based on the square of the bin capacity after placing the item.\"\"\"\n    return -(bins - item)**2",
+        "Intuition": " The new heuristic will consider the square of the remaining capacity of the bins after placing the item. The goal is to minimize the empty space left in the bins but putting more emphasis on bins with larger remaining capacities. This heuristic will try to balance between filling up the bins and leaving enough space for larger items. ",
+        "num_item": 3,
+        "parents": [
+            "0.06680369989722508",
+            "0.06591143151390326"
+        ]
+    },
+    "0.06680369989722508 \u6570\u503c\u91cd\u590d": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n  \"\"\"Adaptive balance heuristic.\"\"\"\n  return bins - item",
+        "Intuition": " This heuristic is based on the idea of \"adaptive balance\". The heuristic prefers bins where the item's size is smaller than the bin's remaining capacity. The reasoning behind this is that by adding an item to a bin with more than enough space, we are creating a balance between the bins, reducing the chance of having a bin that is too full or too empty. ",
+        "num_item": 8,
+        "parents": [
+            "0.06591143151390326",
+            "0.06988694758478928"
+        ]
+    },
+    "1.4665981500513874": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # Get the size of the smallest item not yet packed.\n    smallest_item = min(items)\n    # Calculate the remaining space in each bin after packing the current item.\n    remaining_space = bins - item\n    # Calculate the absolute difference between the remaining space and the size of the smallest item.\n    diff = abs(remaining_space - smallest_item)\n    # Give higher priority to the bin where the difference is minimal.\n    priorities = 1 / (1 + diff)\n    return priorities",
+        "Intuition": " The new heuristic tries to place each item into a bin such that the remaining space in the bin is closest to the size of the smallest item not yet packed. If there are multiple bins with the same remaining space, select the one with the smallest initial capacity. This heuristic assumes that the items are sorted in non-decreasing order before packing. ",
+        "num_item": 6,
+        "parents": [
+            "0.06591143151390326",
+            "0.05973223480947489"
+        ]
+    },
+    "1.4665981500513874 \u6570\u503c\u91cd\u590d": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n  \"\"\"Proportional remaining space heuristic.\"\"\"\n  return (bins - item) / bins",
+        "Intuition": " This heuristic is based on the idea of \"proportional remaining space\". The heuristic prefers bins where the percentage of remaining space after adding the item is higher. The reasoning behind this is that by adding an item to a bin with a higher proportion of remaining space, we are more likely to have room for future items of various sizes. ",
+        "num_item": 9,
+        "parents": [
+            "0.06680369989722508 \u6570\u503c\u91cd\u590d",
+            "0.06591143151390326"
+        ]
+    },
+    "0.0661157024793389": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins where the item fits just right.\"\"\"\n    remaining_space = bins - item\n    # Set a large negative value for bins where item can't fit.\n    remaining_space[remaining_space < 0] = -np.inf\n    return -remaining_space",
+        "Intuition": " The generated heuristic aims to balance between filling up the bins and leaving room for bigger items in the future. It gives higher priority to bins that can fit the item just right, i.e., bins where after packing the item, remaining space is least but still more than zero. It tries to avoid both extremes: not filling up bins too quickly and not leaving too much space empty. ",
+        "num_item": 0,
+        "parents": [
+            "0.06474820143884889",
+            "0.06680369989722508"
+        ]
+    },
+    "0.06404958677685954": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins based on the difference of the bin capacity and the item size.\"\"\"\n    return bins - item",
+        "Intuition": " The new heuristic will consider the difference between the item size and the remaining capacity of the bins. It will prioritize bins where this difference is smaller, trying to fit the items in the bins where they leave less space unused.",
+        "num_item": 1,
+        "parents": [
+            "0.05973223480947489",
+            "0.06680369989722508"
+        ]
+    },
+    "0.0599173553719008": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins with capacities closest to the average capacity.\"\"\"\n    avg_capacity = np.average(bins)\n    return -np.abs(bins - avg_capacity)",
+        "Intuition": " The new heuristic aims to balance the usage of the bins. It prioritizes bins that have capacities closest to the average capacity of all bins. This encourages a more even distribution of items across all bins, which could lead to more efficient use of space.",
+        "num_item": 2,
+        "parents": [
+            "0.06591143151390326",
+            "0.06474820143884889"
+        ]
+    },
+    "0.2954545454545455": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Custom heuristic for online binpacking.\"\"\"\n    # Calculate the remaining space in each bin after placing the item.\n    remaining_space = bins - item\n    # Calculate the score for each bin.\n    # Bins that are nearly full (remaining space close to 0) get high scores.\n    # Bins that are nearly empty (remaining space close to bin size) also get high scores.\n    # Other bins get scores between these two extremes.\n    scores = np.abs(remaining_space - (bins / 2))\n    return scores",
+        "Intuition": " Prioritize bins that are either nearly full or nearly empty. This encourages filling up bins that are almost complete, while also trying to leave large spaces open for larger items that might come in later, which can help reduce the total number of bins used. ",
+        "num_item": 3,
+        "parents": [
+            "0.06591143151390326",
+            "0.05973223480947489"
+        ]
+    },
+    "0.0661157024793389 \u6570\u503c\u91cd\u590d": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins where the item fills a larger proportion of the remaining capacity.\"\"\"\n    return item / bins",
+        "Intuition": " This new heuristic prioritizes bins where the item would fill a higher percentage of the remaining capacity. The idea is to minimize wasted space by matching items to bins where they make up a larger proportion of the remaining capacity. ",
+        "num_item": 4,
+        "parents": [
+            "0.06474820143884889",
+            "0.06591143151390326"
+        ]
+    },
+    "0.06301652892561993": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins based on the ratio of the item size to the bin capacity.\"\"\"\n    return item / bins",
+        "Intuition": " The new heuristic will consider the ratio between the item size and the remaining capacity of the bins. It will prioritize bins where this ratio is smaller, meaning that the item will take up a smaller proportion of the remaining space, leaving more room for potential future items. ",
+        "num_item": 5,
+        "parents": [
+            "0.05973223480947489",
+            "0.06404958677685954"
+        ]
+    },
+    "1.4793388429752066": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins with the least remaining capacity and closest to the item size.\"\"\"\n    bins_capacity_diff = bins - item\n    avg_diff = np.average(bins_capacity_diff)\n    return -np.abs(bins_capacity_diff - avg_diff)",
+        "Intuition": " The new heuristic aims to maximize the usage of the bins while also considering the size of the item to be packed. It is a combination of the first two heuristics. It prioritizes bins with the least remaining capacity that can also accommodate the item size, and it also considers the average capacity of all bins. It discourages the use of bins with capacity much larger than the item size to save space for bigger items in the future. ",
+        "num_item": 6,
+        "parents": [
+            "0.06474820143884889",
+            "0.0599173553719008"
+        ]
+    },
+    "1.4793388429752066 \u6570\u503c\u91cd\u590d": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins based on the remaining capacity after adding the item.\"\"\"\n    return bins - item",
+        "Intuition": " The new heuristic will consider the remaining capacity of the bins after adding the item. It will prioritize bins where this remaining capacity is larger, meaning that bins will have more space for potential future items.  ",
+        "num_item": 9,
+        "parents": [
+            "0.06301652892561993 \u6570\u503c\u91cd\u590d",
+            "0.06301652892561993"
+        ]
+    },
+    "0.06301652892561993 \u6570\u503c\u91cd\u590d": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Heuristic that prioritizes bins based on the absolute difference between the item size and the bin capacity.\"\"\"\n    return abs(bins - item)",
+        "Intuition": " The new heuristic will consider the absolute difference between the item size and the remaining capacity of the bins. It will prioritize bins where this difference is smaller, meaning that the item will fit more snugly into the remaining space, potentially allowing for more efficient usage of the bins' capacity. ",
+        "num_item": 8,
+        "parents": [
+            "0.06301652892561993",
+            "0.06474820143884889"
+        ]
+    }
+}

@@ -1,0 +1,157 @@
+{
+    "init -2": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n  def s(bin, item):\n    if bin - item <= 2:\n      return 4\n    elif (bin - item) <= 3:\n      return 3\n    elif (bin - item) <= 5:\n      return 2\n    elif (bin - item) <= 7:\n      return 1\n    elif (bin - item) <= 9:\n      return 0.9\n    elif (bin - item) <= 12:\n      return 0.95\n    elif (bin - item) <= 15:\n      return 0.97\n    elif (bin - item) <= 18:\n      return 0.98\n    elif (bin - item) <= 20:\n      return 0.98\n    elif (bin - item) <= 21:\n      return 0.98\n    else:\n      return 0.99\n\n  return np.array([s(b, item) for b in bins])",
+        "Intuition": "The heuristic assigns varying scores to bins based on the remaining space after adding an item, favoring bins that would be more evenly filled.",
+        "score": 0.05973223480947489,
+        "parents": [
+            0,
+            0
+        ],
+        "equivalency": "None"
+    },
+    "init -1": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    return -(bins-item)",
+        "Intuition": "To place each item into the bin that would leave the least amount of empty space after the item is packed. ",
+        "score": 0.06591143151390326,
+        "parents": [
+            0,
+            0
+        ],
+        "equivalency": "None"
+    },
+    "iter 0": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    #This heuristic prioritizes bins where the item will leave the least leftover space\n    #but also takes into account the total capacity of the bin. The idea is to balance \n    #filling up bins efficiently while also not unduly prioritizing smaller bins, \n    #which might lead to a higher total number of bins used.\n\n    # Calculate the leftover space after placing the item in each bin\n    leftovers = bins - item\n\n    # Look for bins where the item would leave a small amount of space remaining\n    # We add a small constant to avoid division by zero\n    efficiency_score = 1 / (leftovers + 1e-10)\n\n    # Also take into account the total bin capacity. Larger bins get a higher score\n    # Normalize the capacities so that they are in the same range as the efficiency scores\n    capacity_score = bins / np.max(bins)\n\n    # Combine the scores. We can adjust the weight of the efficiency_score and capacity_score\n    # to make the heuristic more or less aggressive\n    return 0.7 * efficiency_score + 0.3 * capacity_score",
+        "score": 0.7370030581039757,
+        "parents": [
+            "init -1",
+            "init -2"
+        ],
+        "equivalency": "None"
+    },
+    "iter 1": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic gives priority to bins where the item will fit perfectly or \n    # where the item would fill the bin to a certain threshold (e.g., 80% capacity). \n    # The rationale is to prioritize filling bins to a useful extent over leaving \n    # little space remaining. This should encourage more balanced use of bins, \n    # potentially reducing the total number of bins needed.\n\n    # Calculate the leftover space and capacity ratio after placing the item in each bin\n    leftovers = bins - item\n    capacity_ratio = (bins - leftovers) / bins\n\n    # Assign high priority to bins where the item would fit perfectly \n    perfect_fit_score = (leftovers == 0).astype(float)\n\n    # Also assign high priority to bins where the item would fill the bin to 80% capacity or more\n    high_fill_score = (capacity_ratio >= 0.8).astype(float)\n\n    # Combine the scores. We give higher weight to perfect_fit_score as we consider it more important\n    return 0.6 * perfect_fit_score + 0.4 * high_fill_score",
+        "score": 0.08053007135575949,
+        "parents": [
+            "iter 0",
+            "init -2"
+        ],
+        "equivalency": "None"
+    },
+    "iter 2": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # In this heuristic, we prioritize bins based on the leftover space after placing the item in each bin.\n    # However, instead of simply prioritizing the smallest leftover space, we instead favor bins where the leftover \n    # space is closest to the size of the smallest item not yet placed in a bin. This can help to avoid situations \n    # where a small item cannot be placed because all bins have leftover space that is slightly too small.\n\n    # Calculate the leftover space after placing the item in each bin\n    leftovers = bins - item\n\n    # Calculate the difference between the leftover space and the size of the smallest item\n    # For now, we assume that the smallest item has a size of 1.0. If information about the sizes of the other items \n    # was available, we could use that instead.\n    diff = np.abs(leftovers - 1.0)\n\n    # Convert the differences into scores. Bins where the leftover space is closest to the size of the smallest item \n    # get the highest score.\n    scores = 1 / (diff + 1e-10)\n\n    return scores",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 0",
+            "init -2"
+        ],
+        "equivalency": "None"
+    },
+    "iter 3": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic tries to balance the remaining space in each bin after placing the item\n    # and the amount of space that the item will occupy in the bin.\n\n    # Calculate the leftover space after placing the item in each bin\n    leftovers = bins - item\n\n    # Calculate how much of the bin's capacity the item will fill\n    fill_ratio = item / bins\n\n    # Calculate the score for each bin. The score is based on the remaining space in the bin\n    # after placing the item (we prefer bins with less leftover space) and the amount of space \n    # that the item will occupy in the bin (we prefer bins where the item will occupy a larger \n    # proportion of the bin's capacity). We use a weighted sum to combine these two factors into \n    # a single score. The weights can be adjusted to prioritize one factor over the other.\n    return 0.5 * (1 / (leftovers + 1e-10)) + 0.5 * fill_ratio",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 2",
+            "iter 0"
+        ],
+        "equivalency": "iter 2"
+    },
+    "iter 4": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # The new heuristic gives high priority to bins where the item would fit perfectly \n    # and to bins where the item would fill the bin to nearly its full capacity (e.g., 90% capacity).\n    # This should encourage more efficient use of bins, potentially reducing the total number of bins needed.\n\n    # Calculate the leftover space and capacity ratio after placing the item in each bin\n    leftovers = bins - item\n    capacity_ratio = (bins - leftovers) / bins\n\n    # Assign high priority to bins where the item would fit perfectly \n    perfect_fit_score = (leftovers == 0).astype(float)\n\n    # Also assign high priority to bins where the item would fill the bin to 90% capacity or more\n    high_fill_score = (capacity_ratio >= 0.9).astype(float)\n\n    # Combine the scores. We give higher weight to high_fill_score as we consider it more important\n    # to fill the bins to a greater extent\n    return 0.5 * perfect_fit_score + 0.5 * high_fill_score",
+        "score": 0.08154943934760449,
+        "parents": [
+            "init -2",
+            "iter 1"
+        ],
+        "equivalency": "None"
+    },
+    "iter 5": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic prioritizes bins where the item would fit perfectly, \n    # and bins where the item would leave the least amount of empty space.\n\n    # Calculate the leftover space after placing the item in each bin\n    leftovers = bins - item\n\n    # Assign high priority to bins where the item would fit perfectly \n    perfect_fit_score = (leftovers == 0).astype(float)\n\n    # Also assign high priority to bins where the item would leave the least amount of empty space\n    # By minimizing the leftover space, we aim to achieve a more efficient use of bin spaces\n    min_leftover_score = (1 - leftovers / bins)\n\n    # Combine the scores. We give equal weight to both factors\n    return 0.5 * perfect_fit_score + 0.5 * min_leftover_score",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 4",
+            "init -1"
+        ],
+        "equivalency": "iter 3"
+    },
+    "iter 6": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic gives priority to bins where the item would fit perfectly \n    # and to bins where the item would fill the bin to nearly its full capacity (e.g., 95% capacity).\n    # This should encourage more efficient use of bins, potentially reducing the total number of bins needed.\n    # In addition, it also gives a low priority to bins that would be less than 50% full after placing the item.\n    # This aims to avoid leaving many bins partially full, which could lead to inefficient use of space.\n\n    # Calculate the leftover space and capacity ratio after placing the item in each bin\n    leftovers = bins - item\n    capacity_ratio = (bins - leftovers) / bins\n\n    # Assign high priority to bins where the item would fit perfectly \n    perfect_fit_score = (leftovers == 0).astype(float)\n\n    # Also assign high priority to bins where the item would fill the bin to 95% capacity or more\n    high_fill_score = (capacity_ratio >= 0.95).astype(float)\n    \n    # Assign low priority to bins where the item would fill the bin to less than 50% capacity\n    low_fill_score = (capacity_ratio < 0.5).astype(float)\n\n    # Combine the scores. We give higher weight to perfect_fit_score and high_fill_score as we consider it more important\n    # to fill the bins to a greater extent, while penalizing low_fill_score to avoid leaving too many bins partially full\n    return 0.4 * perfect_fit_score + 0.4 * high_fill_score - 0.2 * low_fill_score",
+        "score": 0.08358817533129463,
+        "parents": [
+            "iter 1",
+            "iter 4"
+        ],
+        "equivalency": "None"
+    },
+    "iter 7": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic prioritizes bins where the item will fill the bin to a higher capacity \n    # and where the item will leave a small amount of space remaining after being placed. \n    # The idea is to balance filling up bins effectively while also minimizing the leftover space.\n\n    # Calculate the leftover space after placing the item in each bin\n    leftovers = bins - item\n\n    # Look for bins where the item would leave a small amount of space remaining\n    # We add a small constant to avoid division by zero\n    efficiency_score = 1 / (leftovers + 1e-10)\n\n    # Also assign high priority to bins where the item would fill the bin to 70% capacity or more.\n    # The capacity ratio is calculated as the ratio of the space that will be occupied by the item to the total capacity of the bin.\n    capacity_ratio = item / bins\n    high_fill_score = (capacity_ratio >= 0.7).astype(float)\n\n    # Combine the scores. We give higher weight to efficiency_score as we consider it more important\n    return 0.6 * efficiency_score + 0.4 * high_fill_score",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 1",
+            "iter 0"
+        ],
+        "equivalency": "iter 5"
+    },
+    "iter 8": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # The new heuristic introduces the concept of a \"slack factor\", \n    # which is the difference between the bin's current capacity and the item size. \n    # Bins with the lowest slack factor (i.e., bins where the item fits most snugly) are given the highest priority.\n\n    # Calculate the slack factor for each bin\n    slack_factor = bins - item\n\n    # Normalize the slack factor to get a value between 0 and 1 for each bin\n    slack_factor_normalized = (slack_factor - slack_factor.min()) / (slack_factor.max() - slack_factor.min())\n\n    # Calculate the inverse slack factor (i.e., the priority)\n    # Bins with the lowest slack factor (i.e., where the item fits most snugly) will have the highest priority\n    priority = 1 - slack_factor_normalized\n\n    return priority",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 6",
+            "iter 4"
+        ],
+        "equivalency": "iter 7"
+    },
+    "iter 9": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic introduces a new concept of \"optimal usage factor\" which is calculated as \n    # the ratio of the item size and the bin's current capacity.\n    # The idea is to give highest priority to the bins where the item fits just perfectly or where \n    # the bin would be almost full after placing the item (i.e., optimal usage).\n    # This should encourage the items to fill the bins as much as possible, \n    # potentially reducing the total number of bins needed.\n\n    # Calculate the optimal usage factor for each bin\n    optimal_usage_factor = item / bins\n\n    # Normalize the optimal usage factor to get a value between 0 and 1 for each bin\n    optimal_usage_factor_normalized = (optimal_usage_factor - optimal_usage_factor.min()) / (optimal_usage_factor.max() - optimal_usage_factor.min())\n\n    # Calculate the priority score\n    # Bins with the highest optimal usage factor (i.e., where the item fits best or makes the bin almost full) will have the highest priority\n    priority = optimal_usage_factor_normalized\n\n    return priority",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 8",
+            "iter 6"
+        ],
+        "equivalency": "iter 8"
+    },
+    "iter 10": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic introduces a new concept of \"Value to Size Ratio\" (VSR). \n    # VSR is the ratio of the remaining space in the bin to the current size of the bin.\n    # The idea is to prioritize bins with lower VSR, meaning the item fills a bigger proportion of the bin.\n    # This should lead to a more efficient use of space, potentially reducing the total number of bins used.\n    # Also, this heuristic provides less priority to bins which will be left with less than 10% of their capacity after adding the item.\n    # This aims at avoiding the scenario where an item that could perfectly fit in a bin is not placed there because of previous decisions.\n\n    # Calculate the leftover space in the bin after placing the item\n    leftovers = bins - item\n\n    # Calculate the value to size ratio. Add a small constant to avoid division by zero\n    vsr = leftovers / (bins + 1e-10)\n\n    # Assign high priority to bins with lower VSR\n    vsr_score = 1 / (vsr + 1e-10)\n\n    # Assign low priority to bins which will be left with less than 10% of their capacity after adding the item\n    low_space_score = (leftovers < 0.1 * bins).astype(float)\n\n    # Combine the scores. We give higher weight to vsr_score as we consider it more important\n    # to fill the bins to a greater extent, while penalizing low_space_score to avoid leaving too many bins partially full\n    return 0.9 * vsr_score - 0.1 * low_space_score",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 0",
+            "iter 6"
+        ],
+        "equivalency": "iter 9"
+    },
+    "iter 11": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # The new heuristic introduces a concept of \"Efficient Utilization Score\" (EUS). \n    # EUS is a score that measures how efficiently the space of the bin is used if the current item is placed in it.\n    # The score is calculated as the ratio of the size of the item to the current size of the bin, squared. \n    # The square is used to give more priority to bins where the item fills a larger proportion of the bin.\n    # Additionally, this heuristic penalizes bins which will be left with less than 20% of their capacity after adding the item.\n    # This discourages the use of bins which will be nearly full but not quite, leading to more efficient use of space overall.\n\n    # Calculate the leftover space in the bin after placing the item\n    leftovers = bins - item\n\n    # Calculate the Efficient Utilization Score\n    eus = (item / (bins + 1e-10))**2\n\n    # Assign low priority to bins which will be left with less than 20% of their capacity after adding the item\n    low_space_penalty = (leftovers < 0.2 * bins).astype(float)\n\n    # Combine the scores. We give higher weight to eus as we consider it more important\n    # to efficiently utilize the space in the bins, while penalizing low_space_penalty to avoid leaving too many bins nearly full\n    return eus - 0.1 * low_space_penalty",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 4",
+            "iter 10"
+        ],
+        "equivalency": "iter 10"
+    },
+    "iter 12": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic tries to maximize the utilization of the bins by prioritizing \n    # bins where the item would increase the fill level to above 70%, but not overfill it. \n    # Moreover, it gives higher priority to bins where the item would leave less leftover space.\n\n    # Calculate the leftover space and capacity ratio after placing the item in each bin\n    leftovers = bins - item\n    capacity_ratio = (bins - leftovers) / bins\n\n    # Assign high priority to bins where the item would increase the fill level to above 70%, \n    # but not overfill it.\n    utilization_score = ((capacity_ratio >= 0.7) & (capacity_ratio <= 1)).astype(float)\n\n    # Look for bins where the item would leave a small amount of space remaining\n    # We add a small constant to avoid division by zero\n    efficiency_score = 1 / (leftovers + 1e-10)\n\n    # Combine the scores. We give higher weight to utilization_score as we consider it more important\n    return 0.7 * utilization_score + 0.3 * efficiency_score",
+        "score": 0.07645259938837921,
+        "parents": [
+            "iter 1",
+            "iter 0"
+        ],
+        "equivalency": "iter 11"
+    },
+    "iter 13": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This new heuristic gives high priority to bins where the item would fit perfectly \n    # and to bins where the item would fill the bin to nearly its full capacity (e.g., 85% capacity).\n    # This should encourage more efficient use of bins, potentially reducing the total number of bins needed.\n    # It also gives a lower priority to bins that would be less than 40% full after placing the item,\n    # aiming to prevent having many bins that are just partially full, which could lead to inefficient use of space.\n\n    # Calculate the leftover space and capacity ratio after placing the item in each bin\n    leftovers = bins - item\n    capacity_ratio = (bins - leftovers) / bins\n\n    # Assign high priority to bins where the item would fit perfectly \n    perfect_fit_score = (leftovers == 0).astype(float)\n\n    # Also assign high priority to bins where the item would fill the bin to 85% capacity or more\n    high_fill_score = (capacity_ratio >= 0.85).astype(float)\n    \n    # Assign low priority to bins where the item would fill the bin to less than 40% capacity\n    low_fill_score = (capacity_ratio < 0.4).astype(float)\n\n    # Combine the scores. We give higher weight to perfect_fit_score and high_fill_score as we consider it more important\n    # to fill the bins to a greater extent, while penalizing low_fill_score to avoid leaving too many bins partially full\n    return 0.5 * perfect_fit_score + 0.4 * high_fill_score - 0.1 * low_fill_score",
+        "score": 0.08154943934760449,
+        "parents": [
+            "iter 6",
+            "iter 4"
+        ],
+        "equivalency": "iter 4"
+    },
+    "iter 14": {
+        "code": "def priority(item: float, bins: np.ndarray) -> np.ndarray:\n    # This heuristic prioritizes bins that are close to being filled after including the item.\n    # It also prioritizes bins that will be over 50% filled after adding the item, since we want to avoid\n    # having too many bins that are only partially filled.\n    # The aim is to balance between filling up bins as much as possible and not having too many partially filled bins.\n\n    # Calculate the remaining space after placing the item in each bin\n    remaining_space = bins - item\n\n    # Calculate the percentage of the bin that would be filled after adding the item\n    fill_ratio = (bins - remaining_space) / bins\n\n    # Assign a high priority to bins that will be almost filled after adding the item\n    high_fill_score = (remaining_space < 0.1 * bins).astype(float)\n\n    # Assign some priority to bins that will be over 50% filled after adding the item\n    over_half_filled_score = (fill_ratio > 0.5).astype(float)\n\n    # Combine the scores, weighing more towards high_fill_score\n    return 0.7 * high_fill_score + 0.3 * over_half_filled_score",
+        "score": 0.08256880733944963,
+        "parents": [
+            "iter 13",
+            "iter 0"
+        ],
+        "equivalency": "None"
+    }
+}

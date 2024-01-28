@@ -18,7 +18,9 @@ GPT-4**自己就会重复**. 分析可能的原因:
 
 3. 关于GPT自己生成函数的错误率: 存在错误或者warning, 但是Google他们很聪明地把任务拆解, 使得LLM生成的代码本身并不复杂, 但代价就是这一部分的压力给到了prompt上. 
 
+### 对问题研究的专业性: 在设计代码框架的时候的剪枝.
 
+比如在bin-packing问题上现在常用的heuristic算法有first fit; best fit; next fit; 但是在Google设计的算法框架下只能实现前两个, 最后的next fit实现不了. 
 
 
 
